@@ -17,13 +17,19 @@ $ docker build -t hela/nexus3:1.0.0 .
 
 $ cd ..
 $ sudo vi ./nexus-data/etc/nexus.properties 
-$ docker run -d -p 8081:8081 -p 9443:9443 --name nexus -v "$(pwd)"/nexus-data:/nexus-data hela/nexus3:1.0.0
+$ docker run -d -p 8081:8081 -p 9443:9443 -p 8443:8443 --name nexus -v "$(pwd)"/nexus-data:/nexus-data hela/nexus3:1.0.0
 $ export SSL_PORT=9443
 $ echo $SSL_PORT
 $ keytool -printcert -sslserver ${NEXUS_DOMAIN}:${SSL_PORT} -rfc > nexus-build/hela.crt
 $ cat nexus-build/hela.crt 
+  
 $ sudo cp nexus-build/hela.crt /usr/local/share/ca-certificates/
-$ docker login -u rwibawa -p secr3t! https://hela:9443
+$ update-ca-certificates
+
+# dockerd to accept the certificate
+$ sudo mkdir /etc/docker/certs.d/hela:8443
+$ sudo cp ./hela.crt /etc/docker/certs.d/hela:8443/ca.crt
+$ docker login -u rwibawa -p secr3t hela:8443
 
 $ curl -X GET 'https://hela:9443'
 ```
